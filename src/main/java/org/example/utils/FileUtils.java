@@ -1,26 +1,21 @@
+
 package org.example.utils;
 import org.example.Main;
 import java.nio.file.Path;
 import java.util.List;
 import java.nio.file.Files;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class FileUtils {
     public static void processFile() {
         try {
             Path filePath = Path.of(Main.filePath);
-            List<String> allLines = Files.readAllLines(filePath);
-            List<String> firstElements = new ArrayList<>();
-
-            for (String line : allLines) {
-                String[] parts = line.split(";");
-                System.out.println(parts[0]);
-                firstElements.add(parts[0]);
+            List<String> lines = Files.readAllLines(filePath);
+            String[][] matrix = new String[lines.size()][];
+            for (int i = 0; i < lines.size(); i++) {
+                matrix[i] = lines.get(i).split(";");
             }
-            System.out.println("---");
-            System.out.println(firstElements);
-
+            //System.out.println(matrix[0][0] + " | " + matrix[0][1]);
         } catch (IOException e) {
             System.err.println("Ошибка при чтении файла: " + e.getMessage());
         }

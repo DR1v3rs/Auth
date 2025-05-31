@@ -1,9 +1,17 @@
 package org.example.auth;
+import org.example.utils.FileUtils;
+
+import java.nio.file.Path;
 
 public class Authorization {
-    public boolean auth(String login, String password){
+    try {
+        Path Login = Path.of(FileUtils.matrix[1][1]);
 
-    }
+
+
+ //   public boolean auth(String login, String password) {
+    //       System.out.println();
+//    }
 }
 
 
