@@ -50,23 +50,6 @@ public class Authorization {
     }
 }
 
-
-
-//public class Authorization {
-//    public static boolean checkLogin(String login) {
-//        String[][] credentials = FileUtils.getCredentials();
-
-//        for (String[] row : credentials) {
-//            System.out.println(Arrays.toString(row));
-//            if (row.length > 0 && row[0].equals(login)) {
-//                //System.out.println(credentials.toString(row));
-//                return true; // логин найден в первом столбце
-//            }
-//        }
-//        return false; // логин не найден
-//    }
-//}
-
 // метод регистрации пользователя (логин и пароль)
 
 // метод автогизации пользователь (логин и пароль)
