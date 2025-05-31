@@ -8,7 +8,7 @@ public class Main {
     public static String filePath = "C:\\Users\\DikushinAS\\IdeaProjects\\Auth_1.0\\Users.txt";
 
     public static void main(String[] args) {
-        Authorization.userLogin("user01", "Pass01");
+        Authorization.userLogin("user02", "Pass02");
     }
 }
 
