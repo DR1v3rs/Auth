@@ -1,6 +1,9 @@
 package org.example.auth;
 
 public class Authorization {
+    public boolean auth(String login, String password){
+
+    }
 }
 
 
