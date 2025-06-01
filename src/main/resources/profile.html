@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль пользователя</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+    }
+    .header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .profile-info {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .footer {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 0.8em;
+        color: #666;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>Профиль пользователя</h1>
+</div>
+
+<div class="profile-info">
+  <h2>Добро пожаловать, {{USERNAME}}!</h2>
+
+  <p><strong>Статус:</strong> Активный</p>
+  <p><strong>Дата регистрации:</strong> 15 января 2023</p>
+  <p><strong>Последний вход:</strong> Сегодня</p>
+
+  <h3>Настройки</h3>
+  <ul>
+    <li>Уведомления: включены</li>
+    <li>Тема: светлая</li>
+    <li>Язык: русский</li>
+  </ul>
+</div>
+
+<div class="footer">
+  <p>Текущий порт сервера: {{PORT}}</p>
+  <p>&copy; 2023 Моя компания. Все права защищены.</p>
+</div>
+</body>
+</html>

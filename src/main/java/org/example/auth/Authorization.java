@@ -12,7 +12,7 @@ public class Authorization {
     private static boolean wrongPass = false;
     private static boolean login = false;
 
-    private static void readFile(String user, String pass) {
+    private static void readFile(String username, String password) {
         try {
             Path filePath = Path.of(Main.filePath);
             List<String> lines = Files.readAllLines(filePath);
@@ -26,10 +26,10 @@ public class Authorization {
                 matrix[i] = lines.get(i).split(";");
                 if (matrix[i].length == 0) continue;
 
-                if (matrix[i][0].equalsIgnoreCase(user)) {
+                if (matrix[i][0].equalsIgnoreCase(username)) {
                     userFound = true;
 
-                    if (matrix[i].length > 1 && Objects.equals(pass, matrix[i][1])) {
+                    if (matrix[i].length > 1 && Objects.equals(password, matrix[i][1])) {
                         login = true;
                     } else {
                         wrongPass = true;
@@ -48,15 +48,15 @@ public class Authorization {
         }
     }
 
-    public static boolean userLogin(String user, String pass) {
+    public static boolean userLogin(String username, String password) {
         resetStates();
 
-        if (user == null || user.isBlank() || pass == null) {
+        if (username == null || username.isBlank() || password == null) {
             addUser = true;
             return false;
         }
 
-        readFile(user, pass);
+        readFile(username, password);
 
         if (addUser) {
             System.out.println("User not found! Please add user!");
