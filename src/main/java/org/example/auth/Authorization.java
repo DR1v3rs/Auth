@@ -1,5 +1,6 @@
 package org.example.auth;
 
+import org.example.auth.SessionManager;
 import org.example.Main;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,9 +9,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class Authorization {
-    private static boolean addUser = false;
-    private static boolean wrongPass = false;
-    private static boolean login = false;
+    public static boolean addUser = false;
+    public static boolean wrongPass = false;
+    public static boolean login = false;
 
     private static void readFile(String username, String password) {
         try {
@@ -48,12 +49,12 @@ public class Authorization {
         }
     }
 
-    public static boolean userLogin(String username, String password) {
+    public static String userLogin(String username, String password) {
         resetStates();
 
         if (username == null || username.isBlank() || password == null) {
             addUser = true;
-            return false;
+            return null;
         }
 
         readFile(username, password);
@@ -62,11 +63,12 @@ public class Authorization {
             System.out.println("User not found! Please add user!");
         } else if (login) {
             System.out.println("User authorized successfully!");
+            return SessionManager.createSession(username);
         } else if (wrongPass) {
             System.out.println("Wrong password! Please try again!");
         }
 
-        return login;
+        return null;
     }
 
     private static void resetStates() {

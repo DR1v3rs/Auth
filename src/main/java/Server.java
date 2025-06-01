@@ -1,5 +1,6 @@
 import org.example.Main;
 import org.example.auth.Authorization;
+import org.example.auth.SessionManager;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
@@ -52,23 +53,53 @@ public class Server {
             }
         });
 
-        // Пример страницы с динамическими данными
+        // Защищенная страница профиля
         server.createContext("/profile", exchange -> {
-            Map<String, String> vars = new HashMap<>();
-            vars.put("PORT", Main.httpPort);
-            vars.put("USERNAME", "Иван Иванов");
-            handleDynamicHtmlPage(exchange, "/profile.html", vars);
+            String sessionId = getSessionIdFromCookies(exchange);
+
+            if (SessionManager.isValidSession(sessionId)) {
+                String username = SessionManager.getUsername(sessionId);
+                Map<String, String> vars = new HashMap<>();
+                vars.put("PORT", Main.httpPort);
+                vars.put("USERNAME", username);
+                handleDynamicHtmlPage(exchange, "/profile.html", vars);
+            } else {
+                redirectToLogin(exchange);
+            }
+        });
+
+        // Выход из системы
+        server.createContext("/logout", exchange -> {
+            String sessionId = getSessionIdFromCookies(exchange);
+            if (sessionId != null) {
+                SessionManager.invalidateSession(sessionId);
+            }
+            exchange.getResponseHeaders().set("Set-Cookie", "SESSIONID=; Max-Age=0");
+            redirectToLogin(exchange);
         });
     }
 
     private static void handleLoginRequest(HttpExchange exchange) throws IOException {
         String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-        String[] matrix = requestBody.split("&");
-        String[] user = matrix[0].split("=");
-        String[] pass = matrix[1].split("=");
-        String username = user[1];
-        String password = pass[1];
-        Authorization.userLogin(username, password);
+        String[] params = requestBody.split("&");
+        String username = params[0].split("=")[1];
+        String password = params[1].split("=")[1];
+
+        String sessionId = Authorization.userLogin(username, password);
+
+        if (sessionId != null) {
+            // Успешная авторизация
+            exchange.getResponseHeaders().add("Set-Cookie",
+                    "SESSIONID=" + sessionId + "; Path=/; HttpOnly");
+            exchange.getResponseHeaders().set("Location", "/profile");
+            exchange.sendResponseHeaders(302, -1);
+        } else {
+            // Ошибка авторизации
+            Map<String, String> vars = new HashMap<>();
+            vars.put("PORT", Main.httpPort);
+            vars.put("ERROR_MESSAGE", getAuthErrorMessage());
+            handleDynamicHtmlPage(exchange, "/badAuth.html", vars);
+        }
     }
 
     private static void handleHtmlPage(HttpExchange exchange, String htmlFile) throws IOException {
@@ -92,6 +123,32 @@ public class Server {
             e.printStackTrace();
             sendError(exchange, 500, "Internal Server Error");
         }
+    }
+
+    private static String getSessionIdFromCookies(HttpExchange exchange) {
+        String cookies = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies.split(";")) {
+                if (cookie.trim().startsWith("SESSIONID=")) {
+                    return cookie.split("=")[1];
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void redirectToLogin(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set("Location", "/login.html");
+        exchange.sendResponseHeaders(302, -1);
+    }
+
+    private static String getAuthErrorMessage() {
+        if (Authorization.addUser) {
+            return "Пользователь не найден";
+        } else if (Authorization.wrongPass) {
+            return "Неверный пароль";
+        }
+        return "Ошибка авторизации";
     }
 
     private static void sendHtmlResponse(HttpExchange exchange, String html) throws IOException {
