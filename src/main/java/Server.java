@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +27,15 @@ public class Server {
     private static void startServer() throws IOException {
         int port = getServerPort();
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        server.createContext("/", exchange -> handleHtmlPage(exchange, "/index.html"));
+        server.createContext("/hello", exchange -> handleHtmlPage(exchange, "/hello.html"));
+        server.createContext("/login", exchange -> handleHtmlPage(exchange, "/login.html"));
         registerHandlers(server);
         server.start();
         System.out.println("Server started on port: " + port);
     }
 
+    // Метод обработки порта для сервера
     private static int getServerPort() {
         try {
             return Integer.parseInt(Main.httpPort);
@@ -43,11 +46,6 @@ public class Server {
     }
 
     private static void registerHandlers(HttpServer server) {
-        // Статические страницы
-        server.createContext("/", exchange -> handleHtmlPage(exchange, "/index.html"));
-        server.createContext("/hello", exchange -> handleHtmlPage(exchange, "/hello.html"));
-        server.createContext("/login", exchange -> handleHtmlPage(exchange, "/login.html"));
-
         server.createContext("/auth", exchange -> {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 handleLoginRequest(exchange);
@@ -65,25 +63,12 @@ public class Server {
 
     private static void handleLoginRequest(HttpExchange exchange) throws IOException {
         String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-        Map<String, String> formData = parseFormData(requestBody);
-        String username = formData.get("username");
-        String password = formData.get("password");
-
+        String[] matrix = requestBody.split("&");
+        String[] user = matrix[0].split("=");
+        String[] pass = matrix[1].split("=");
+        String username = user[1];
+        String password = pass[1];
         Authorization.userLogin(username, password);
-    }
-
-    private static Map<String, String> parseFormData(String formData) throws UnsupportedEncodingException {
-        Map<String, String> params = new HashMap<>();
-        String[] pairs = formData.split("&");
-
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            String key = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
-            String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
-            params.put(key, value);
-        }
-
-        return params;
     }
 
     private static void handleHtmlPage(HttpExchange exchange, String htmlFile) throws IOException {
