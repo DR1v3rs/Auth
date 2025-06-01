@@ -23,44 +23,10 @@ public class Server {
         // Создаем HTTP-сервер на указанном порту
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // Регистрируем обработчики
-        server.createContext("/", exchange -> {
-            try (InputStream is = Server.class.getResourceAsStream("/index.html")) {
-                if (is == null) {
-                    sendError(exchange, 404, "Page not Found! Страница не найдена");
-                    return;
-                }
-                String html = new String(is.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("{{PORT}}", String.valueOf(Main.httpPort));
-                sendHtmlResponse(exchange, html);
-            }
-        });
-
-        // Обработчик страницы приветствия
-        server.createContext("/hello", exchange -> {
-            try (InputStream is = Server.class.getResourceAsStream("/hello.html")) {
-                if (is == null) {
-                    sendError(exchange, 404, "Page not Found! Страница не найдена");
-                    return;
-                }
-                String html = new String(is.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("{{PORT}}", String.valueOf(Main.httpPort));
-                sendHtmlResponse(exchange, html);
-            }
-        });
-
-        // Обработчик страницы приветствия
-        server.createContext("/login", exchange -> {
-            try (InputStream is = Server.class.getResourceAsStream("/login.html")) {
-                if (is == null) {
-                    sendError(exchange, 404, "Page not Found! Страница не найдена");
-                    return;
-                }
-                String html = new String(is.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("{{PORT}}", String.valueOf(Main.httpPort));
-                sendHtmlResponse(exchange, html);
-            }
-        });
+        // Обработчик страниц
+        server.createContext("/", exchange -> handleHtmlPage(exchange, "/index.html"));
+        server.createContext("/hello", exchange -> handleHtmlPage(exchange, "/hello.html"));
+        server.createContext("/login", exchange -> handleHtmlPage(exchange, "/login.html"));
 
         // Запускаем сервер
         server.start();
@@ -81,6 +47,21 @@ public class Server {
         exchange.sendResponseHeaders(code, response.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response);
+        }
+    }
+
+    private static void handleHtmlPage(HttpExchange exchange, String htmlFile) throws IOException {
+        try (InputStream is = Server.class.getResourceAsStream(htmlFile)) {
+            if (is == null) {
+                sendError(exchange, 404, "Page not Found! Страница не найдена");
+                return;
+            }
+            String html = new String(is.readAllBytes(), StandardCharsets.UTF_8)
+                    .replace("{{PORT}}", String.valueOf(Main.httpPort));
+            sendHtmlResponse(exchange, html);
+        } catch (IOException e) {
+            e.printStackTrace();
+            sendError(exchange, 500, "Internal Server Error");
         }
     }
 }
